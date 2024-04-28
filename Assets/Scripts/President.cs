@@ -102,7 +102,7 @@ public class President : MonoBehaviour
         foreach (Transform el in consoleContainer.transform)
         {
             Destroy(el.gameObject);
-        }
+        } 
 
     }
 

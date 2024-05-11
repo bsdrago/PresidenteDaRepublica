@@ -85,6 +85,7 @@ public class President : MonoBehaviour
     private void Input(TMP_InputField.ContentType type)
     {
         if (activeInputField != null) return;
+        inputValue                   = null;
         activeInputField             = Instantiate(inputTextPrefab, consoleContainer.transform);
         activeInputField.contentType = type;
         activeInputField.onEndEdit.AddListener(InputFieldEnviado);
@@ -102,7 +103,7 @@ public class President : MonoBehaviour
         foreach (Transform el in consoleContainer.transform)
         {
             Destroy(el.gameObject);
-        } 
+        }
 
     }
 
@@ -118,10 +119,13 @@ public class President : MonoBehaviour
         if (_gameState == GameState.GASTOS_DO_GOVERNO)
         {
             Impressao(_gameState);
-            GE         = Convert.ToInt32(inputValue);
-            inputValue = null;
+            if (inputValue != null)
+            {
+                GE         = Convert.ToInt32(inputValue);
+                inputValue = null;
+            }
         }
-        if (GE >= 0) _gameState = GameState.GASTOS_COM_SALARIOS;
+        // if (GE >= 0) _gameState = GameState.GASTOS_COM_SALARIOS;
     }
 
     private void LoopPrincipal()

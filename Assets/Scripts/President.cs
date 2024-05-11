@@ -1,26 +1,31 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using Enums;
+using Testes;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 public class President : MonoBehaviour
 {
-    // Classe presidente da republica
     [SerializeField] private GameObject     consoleContainer;
-    [SerializeField] private TMP_Text       lineTextPrefab;
-    [SerializeField] private TMP_InputField inputTextPrefab;
+    [SerializeField] private TMP_Text       textPrefab;
+    [SerializeField] private TMP_InputField inputPrefab;
 
-    // GAME STATE
-    public GameState _gameState = GameState.INIT;
+    public GameState _state = GameState.INIT;
 
-    private TMP_InputField activeInputField;
+    public  List<ConsoleLine>          consoleLines = new List<ConsoleLine>();
+    private Dictionary<string, string> _inputs      = new Dictionary<string, string>();
+    private bool                       _control     = false;
+    private bool                       _canPrint    = true;
 
-    // Simula INPUT do basic
-    private string inputValue;
+    private TMP_InputField _consoleInput;
+    private ConsoleLine    _consoleData;
+
 
 
     // variaveis da simulação
-    private float  ML = 1000000f;
+    private float  ML = 1_000_000f;
     private int    P; // POPULACAO - Population?
     private int    U; // DESEMPREGADOS - UNEMPOLYMENT?
     private int    IV   = 236; // INVERSAO
@@ -48,85 +53,104 @@ public class President : MonoBehaviour
 
     private void Inicializacao()
     {
-        _gameState = GameState.INIT;
-        ML         = 1000000f;
-        P          = Mathf.RoundToInt(3 * ML);
-        U          = P / 10;
-        IV         = 236;
-        GE         = 118;
-        GU         = 0;
-        GI         = 0; //  $ POR IMPOSTOS
-        WN         = 100; //  NOVOS SALARIOS
-        WO         = 100; //  ANTIGOS SALARIOS
-        IP         = 5; //  % DE INFLACAO
-        GDP        = 440; //  PROD.NAC.BRUTO
-        AGDP       = 440; //  BASE DO PROD.NAC.BRUTO
-        RGDP       = 440; //  PNB REAL
-        CN         = 354; //  CONSTANTE ECONOMICA
-        Z          = 1;
-        GAME       = 0;
-        FLAG       = 0;
-        Y          = 0; // ANOS NA PRESIDENCIA
-        BD         = 0;
+        ML   = 1000000;
+        P    = Mathf.RoundToInt(3 * ML);
+        U    = P / 10;
+        IV   = 236;
+        GE   = 118;
+        GU   = 0;
+        GI   = 0; //  $ POR IMPOSTOS
+        WN   = 100; //  NOVOS SALARIOS
+        WO   = 100; //  ANTIGOS SALARIOS
+        IP   = 5; //  % DE INFLACAO
+        GDP  = 440; //  PROD.NAC.BRUTO
+        AGDP = 440; //  BASE DO PROD.NAC.BRUTO
+        RGDP = 440; //  PNB REAL
+        CN   = 354; //  CONSTANTE ECONOMICA
+        Z    = 1;
+        GAME = 0;
+        FLAG = 0;
+        Y    = 0; // ANOS NA PRESIDENCIA
+        BD   = 0;
 
         Print("Digite o seu nome, Presidente");
-        Input(TMP_InputField.ContentType.Alphanumeric);
-
+        InputText("name");
     }
 
-
-    private void Print(string str)
+    private void RefreshTerminal()
     {
-        TMP_Text lineText = Instantiate(lineTextPrefab, consoleContainer.transform);
-        lineText.SetText(str);
-    }
-
-
-    private void Input(TMP_InputField.ContentType type)
-    {
-        if (activeInputField != null) return;
-        inputValue                   = null;
-        activeInputField             = Instantiate(inputTextPrefab, consoleContainer.transform);
-        activeInputField.contentType = type;
-        activeInputField.onEndEdit.AddListener(InputFieldEnviado);
-
-    }
-    public void InputFieldEnviado(string str)
-    {
-        inputValue                    = activeInputField.text;
-        activeInputField.interactable = false;
-        activeInputField              = null;
-    }
-
-    public void Cls()
-    {
-        foreach (Transform el in consoleContainer.transform)
+        foreach (ConsoleLine line in consoleLines)
         {
-            Destroy(el.gameObject);
-        }
+            if (_canPrint)
+            {
+                _control = false;
+                Debug.Log("CL: " + consoleLines.Count);
+                if (line.type == ConsoleLine.Type.text)
+                {
+                    _canPrint = false;
+                    TMP_Text consoleLine = Instantiate(textPrefab, consoleContainer.transform);
+                    consoleLine.SetText(line.content);
+                    consoleLines.Remove(line);
+                    _control  = true;
+                    _canPrint = true;
+                }
 
+                if (line.type == ConsoleLine.Type.input)
+                {
+                    _canPrint     = false;
+                    _consoleInput = Instantiate(inputPrefab, consoleContainer.transform);
+
+                    _consoleInput.onEndEdit.AddListener((string str) =>
+                    {
+                        Debug.Log("Input: " + str);
+                        Debug.Log("Variavel: " + _consoleData.content);
+                        _inputs.TryAdd(_consoleData.content, str);
+                        Debug.Log("Tamanho:" + _inputs.Count);
+                        _consoleInput.onEndEdit.RemoveAllListeners();
+                        _control  = true;
+                        _canPrint = true;
+
+                    });
+                    _consoleData = line;
+                    consoleLines.Remove(line);
+                }
+                StartCoroutine(WaitControl());
+            }
+        }
+    }
+
+    private IEnumerator WaitControl()
+    {
+        yield return new WaitWhile(() => _control != true);
+    }
+
+    private void Print(string text)
+    {
+        consoleLines.Add(new ConsoleLine() { type = ConsoleLine.Type.text, content = text });
+
+    }
+
+    private void InputText(string variable)
+    {
+        ConsoleLine cl = new ConsoleLine() { type = ConsoleLine.Type.input, content = variable };
+        consoleLines.Add(cl);
+    }
+
+
+    private void Cls()
+    {
+        foreach (Transform child in consoleContainer.transform)
+        {
+            Destroy(child.gameObject);
+        }
     }
 
     private void Update()
     {
-
-        if (_gameState == GameState.INIT)
-        {
-            AS         = inputValue;
-            inputValue = null;
-        }
-        if (AS != null) _gameState = GameState.GASTOS_DO_GOVERNO;
-        if (_gameState == GameState.GASTOS_DO_GOVERNO)
-        {
-            Impressao(_gameState);
-            if (inputValue != null)
-            {
-                GE         = Convert.ToInt32(inputValue);
-                inputValue = null;
-            }
-        }
-        // if (GE >= 0) _gameState = GameState.GASTOS_COM_SALARIOS;
+        Cls();
+        RefreshTerminal();
     }
+
 
     private void LoopPrincipal()
     {
@@ -148,7 +172,6 @@ public class President : MonoBehaviour
 
     private void Impressao(GameState gs)
     {
-        _gameState = GameState.INPUT;
         Cls();
         Print("Presidente:" + AS);
         Print("No poder ha' " + (Y + Z / 4) + " anos.");
@@ -175,7 +198,7 @@ public class President : MonoBehaviour
         {
             case GameState.GASTOS_DO_GOVERNO:
                 Print("Informe os gastos do governo $M");
-                Input(TMP_InputField.ContentType.DecimalNumber);
+                InputText("GE");
                 break;
 
         }

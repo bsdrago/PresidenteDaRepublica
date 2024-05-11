@@ -14,10 +14,10 @@ namespace Testes
         [SerializeField] private TMP_Text       textPrefab;
         [SerializeField] private TMP_InputField inputPrefab;
 
-        public  List<ConsoleLine>          consoleLines;
-        private Dictionary<string, string> _inputs;
-        private bool                       _control  = false;
-        private bool                       _canPrint = true;
+        public  List<ConsoleLine>          consoleLines = new List<ConsoleLine>();
+        private Dictionary<string, string> _inputs      = new Dictionary<string, string>();
+        private bool                       _control     = false;
+        private bool                       _canPrint    = true;
 
         private TMP_InputField _consoleInput;
         private ConsoleLine    _consoleData;
@@ -34,34 +34,21 @@ namespace Testes
             Print("Este é meu primeiro programa!");
             Print("----------------------------------");
             InputText("nome");
-            // Print("Olá" + _inputs["nome"]);
-
-
         }
 
 
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.A))
-            {
-                Print("Texto");
-            }
-            if (Input.GetKeyDown(KeyCode.S))
-            {
-                // InputText();
-            }
-
             RefreshConsole();
         }
         private void RefreshConsole()
         {
-
             foreach (ConsoleLine line in consoleLines)
             {
                 if (_canPrint)
                 {
                     _control = false;
-
+                    Debug.Log("CL: " + consoleLines.Count);
                     if (line.type == ConsoleLine.Type.text)
                     {
                         _canPrint = false;
@@ -76,13 +63,17 @@ namespace Testes
                     {
                         _canPrint     = false;
                         _consoleInput = Instantiate(inputPrefab, consoleContainer.transform);
+
                         _consoleInput.onEndEdit.AddListener((string str) =>
                         {
-                            Debug.Log(str);
-                            _inputs.Add(_consoleData.content, str);
+                            Debug.Log("Input: " + str);
+                            Debug.Log("Variavel: " + _consoleData.content);
+                            _inputs.TryAdd(_consoleData.content, str);
+                            Debug.Log("Tamanho:" + _inputs.Count);
+                            _consoleInput.onEndEdit.RemoveAllListeners();
                             _control  = true;
                             _canPrint = true;
-                            
+
                         });
                         _consoleData = line;
                         consoleLines.Remove(line);
@@ -96,23 +87,15 @@ namespace Testes
             yield return new WaitWhile(() => _control != true);
         }
 
-        private void RecordInput(string str)
+        private void Print(string text)
         {
-            Debug.Log(str);
-            _inputs.Add(_consoleData.content, str);
-            _control  = true;
-            _canPrint = true;
-
-        }
-        private void Print(string texto)
-        {
-            consoleLines.Add(new ConsoleLine() { type = ConsoleLine.Type.text, content = texto });
+            consoleLines.Add(new ConsoleLine() { type = ConsoleLine.Type.text, content = text });
 
         }
 
-        private void InputText(string v)
+        private void InputText(string variable)
         {
-            ConsoleLine cl = new ConsoleLine() { type = ConsoleLine.Type.input, content = v };
+            ConsoleLine cl = new ConsoleLine() { type = ConsoleLine.Type.input, content = variable };
             consoleLines.Add(cl);
         }
 

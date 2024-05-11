@@ -46,37 +46,6 @@ public class President : MonoBehaviour
     private string AS; // Nome do presidente
     private int    BD;
 
-    private void Start()
-    {
-        Inicializacao();
-    }
-
-    private void Inicializacao()
-    {
-        ML   = 1000000;
-        P    = Mathf.RoundToInt(3 * ML);
-        U    = P / 10;
-        IV   = 236;
-        GE   = 118;
-        GU   = 0;
-        GI   = 0; //  $ POR IMPOSTOS
-        WN   = 100; //  NOVOS SALARIOS
-        WO   = 100; //  ANTIGOS SALARIOS
-        IP   = 5; //  % DE INFLACAO
-        GDP  = 440; //  PROD.NAC.BRUTO
-        AGDP = 440; //  BASE DO PROD.NAC.BRUTO
-        RGDP = 440; //  PNB REAL
-        CN   = 354; //  CONSTANTE ECONOMICA
-        Z    = 1;
-        GAME = 0;
-        FLAG = 0;
-        Y    = 0; // ANOS NA PRESIDENCIA
-        BD   = 0;
-
-        Print("Digite o seu nome, Presidente");
-        InputText("name");
-    }
-
     private void RefreshTerminal()
     {
         foreach (ConsoleLine line in consoleLines)
@@ -148,7 +117,54 @@ public class President : MonoBehaviour
     private void Update()
     {
         Cls();
+
+        switch (_state)
+        {
+            case GameState.INIT:
+                Inicializacao();
+                break;
+            case GameState.GASTOS_DO_GOVERNO:
+                break;
+            case GameState.GASTOS_COM_SALARIOS:
+                break;
+            case GameState.PERMITE_IMIGRANTES:
+                break;
+            case GameState.QUANTOS_IMIGRANTES:
+                break;
+            case GameState.CALCULA:
+                break;
+            case GameState.ENDGAME:
+                break;
+        }
         RefreshTerminal();
+    }
+
+    private void Inicializacao()
+    {
+        ML   = 1000000;
+        P    = Mathf.RoundToInt(3 * ML);
+        U    = P / 10;
+        IV   = 236;
+        GE   = 118;
+        GU   = 0;
+        GI   = 0; //  $ POR IMPOSTOS
+        WN   = 100; //  NOVOS SALARIOS
+        WO   = 100; //  ANTIGOS SALARIOS
+        IP   = 5; //  % DE INFLACAO
+        GDP  = 440; //  PROD.NAC.BRUTO
+        AGDP = 440; //  BASE DO PROD.NAC.BRUTO
+        RGDP = 440; //  PNB REAL
+        CN   = 354; //  CONSTANTE ECONOMICA
+        Z    = 1;
+        GAME = 0;
+        FLAG = 0;
+        Y    = 0; // ANOS NA PRESIDENCIA
+        BD   = 0;
+
+        Print("Digite o seu nome, Presidente");
+        InputText("name");
+        // if (_inputs.ContainsKey("name"))
+            // _state = GameState.GASTOS_DO_GOVERNO;
     }
 
 

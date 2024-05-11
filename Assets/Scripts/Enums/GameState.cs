@@ -5,7 +5,8 @@
         INIT,
         GASTOS_DO_GOVERNO,
         GASTOS_COM_SALARIOS,
-        INPUT,
+        PERMITE_IMIGRANTES,
+        QUANTOS_IMIGRANTES,
         CALCULA,
         ENDGAME
     }
